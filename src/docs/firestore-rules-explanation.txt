@@ -1,0 +1,79 @@
+Firestore Security Rules & Access Control Explanation
+=====================================================
+
+This document outlines the security rules and data access permissions for the Assesly application's Firestore database. The rules are designed to ensure that users can only access and modify data they are authorized to, protecting user privacy and data integrity.
+
+---
+
+### Key User Roles & Definitions
+
+1.  **Public/Unauthenticated User**: Any user accessing the application without being logged in.
+2.  **Authenticated User**: Any user who has successfully logged in.
+3.  **Form Owner**: The authenticated user who created a specific form (`request.auth.uid == resource.data.userId`).
+4.  **Collaborator**: An authenticated user whose email is in a form's `sharedWith` array.
+5.  **Super Admin**: A specific, hardcoded user (`request.auth.uid == SUPER_ADMIN_UID`) with elevated privileges.
+
+---
+
+### Collection-by-Collection Rules Breakdown
+
+#### 1. `users/{userId}`
+*   **Purpose**: Stores public profile information for each user.
+*   **Access Rules**:
+    *   `read`: Any authenticated user can read any user's profile (e.g., to display collaborator names/avatars).
+    *   `create`: A user can only create their own user document (`request.auth.uid == userId`).
+    *   `update`: A user can only update their own user document.
+
+#### 2. `forms/{formId}`
+*   **Purpose**: The primary collection storing all form configuration data.
+*   **Access Rules**:
+    *   `read`:
+        - **Form Owner**: Can always read their own forms.
+        - **Collaborator**: Can read forms where their email is in the `sharedWith` list.
+        - **Super Admin**: Can read any form.
+        - **Public**: Unauthenticated users can read a form *only if* it is published (`resource.data.isPublished == true`). This is essential for the public form-filling view.
+    *   `create`: Any authenticated user can create a new form. The rule ensures the `userId` in the new document matches the creator's UID.
+    *   `update`:
+        - **Form Owner**: Is the only user who can update the main form document (e.g., change fields, styles, settings). This is the most restrictive and important rule to maintain data integrity.
+    *   `delete`: Only the **Form Owner** can delete their own form.
+
+#### 3. `forms/{formId}/submissions/{submissionId}`
+*   **Purpose**: A subcollection under each form to store individual user responses.
+*   **Access Rules**:
+    *   `list`, `read`:
+        - **Form Owner** and **Collaborators** can read and list all submissions for a form they have access to.
+        - **Super Admin** can read/list any submission.
+    *   `create`: **Anyone** (including unauthenticated users) can create a submission, but *only if* the parent form is published and not closed (`get(/databases/$(database)/documents/forms/$(formId)).data.isPublished == true`). This allows the public to submit responses.
+    *   `update`: **Form Owner** and **Collaborators** can update submissions (e.g., to add a score or mark as spam).
+    *   `delete`: **Form Owner** and **Collaborators** can delete submissions.
+
+#### 4. `forms/{formId}/views/{viewId}`
+*   **Purpose**: A subcollection for tracking analytics data (form views).
+*   **Access Rules**:
+    *   `list`, `read`: Only the **Form Owner** can read view data for their own forms. This protects analytics from being publicly accessible.
+    *   `create`: **Anyone** can create a view document. This happens automatically when the public form page is loaded.
+
+#### 5. `folders/{folderId}`
+*   **Purpose**: Stores folder information for organizing forms.
+*   **Access Rules**:
+    *   `read`, `create`, `update`, `delete`: Actions are restricted to the **Form Owner** (`request.auth.uid == resource.data.userId`). Users can only manage their own folders.
+
+#### 6. `formInvitations/{invitationId}`
+*   **Purpose**: Manages invitations for form collaboration.
+*   **Access Rules**:
+    *   `read`: The **Form Owner** (inviter) or the **Invited User** (recipient) can read an invitation.
+    *   `create`: Only the **Form Owner** of the corresponding form can create an invitation.
+    *   `update`: The **Invited User** can update the invitation to accept or decline it (`status` field).
+
+#### 7. `notifications/{notificationId}`
+*   **Purpose**: Stores notifications for users.
+*   **Access Rules**:
+    *   `read`: A user can only read notifications where their UID matches `recipientId` or their email matches `recipientEmail`.
+    *   `create`: Any **Authenticated User** can create a notification (e.g., sending an invite triggers a notification).
+    *   `update`, `delete`: A user can only manage notifications sent to them.
+
+#### 8. `publicForms/{formId}`
+*   **Purpose**: A denormalized, public-facing collection for quickly querying a list of public forms without complex indexing.
+*   **Access Rules**:
+    *   `read`: **Anyone** can read this collection.
+    *   `create`, `update`, `delete`: This action is allowed only if the requesting user is the owner of the original form in the `forms` collection. This securely allows the owner to publish their form.

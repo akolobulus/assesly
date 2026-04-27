@@ -1,0 +1,37 @@
+
+# Cache and log files
+*.log
+.DS_Store
+firebase-debug.log
+firestore-debug.log
+storage-debug.log
+
+# Node.js dependencies
+node_modules
+
+# Local development files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE/Editor directories
+.vscode
+.idea
+
+# Build output and other generated files
+.next
+out
+
+# Git files
+.git
+.gitignore
+
+# Other unnecessary files
+README.md
+components.json
+cors.json
+next.config.ts
+apphosting.yaml
+```

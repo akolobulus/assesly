@@ -1,0 +1,40 @@
+
+.animated-checkmark-group {
+    transform-origin: center;
+    animation: scale-in-group 0.5s ease-out forwards;
+}
+
+.animated-checkmark-circle {
+    opacity: 0;
+    transform-origin: center;
+    animation: fade-scale-in 0.4s 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animated-checkmark-check {
+    opacity: 0;
+    transform-origin: center;
+    animation: fade-scale-in 0.3s 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+
+@keyframes scale-in-group {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fade-scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

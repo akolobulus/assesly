@@ -1,0 +1,233 @@
+
+@import "../styles/nprogress.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%; /* White */
+    --foreground: 233 10% 13%; /* #1E1F24 - Grayish-Black */
+
+    --muted: 235 5% 60%; /* Lighter Slate-Gray for muted text */
+    --muted-foreground: 235 5% 45%; /* Slate-Gray for text on muted backgrounds */
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 233 10% 13%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 233 10% 13%;
+
+    --border: 223 20% 90%; /* Lighter Gray */
+    --input: 223 20% 90%; /* Lighter Gray */
+
+    --primary: 0 80% 58%; /* Vibrant Red */
+    --primary-foreground: 0 0% 100%; /* White */
+
+    --secondary: 0 80% 90%; /* Light Red */
+    --secondary-foreground: 0 80% 40%; /* Darker Red for text on secondary */
+
+    --accent: 0 80% 96%; /* Very Light Red/Pinkish */
+    --accent-foreground: 0 80% 50%; /* Red for text on accent */
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --ring: 0 80% 60%; /* Red for rings */
+    --radius: 0.5rem;
+
+    /* Sidebar variables */
+    --sidebar-background: 0 0% 100%; /* White */
+    --sidebar-foreground: 233 10% 25%; /* Dark Gray */
+    --sidebar-border: 240 10% 90%; /* #EAECF1 Light Gray-Blue Border for Sidebar */
+    --sidebar-primary: 0 80% 58%; /* Red */
+    --sidebar-primary-foreground: 0 0% 100%; /* White */
+    --sidebar-accent: 0 100% 95%; /* Very light red/pink for My Forms active background */
+    --sidebar-accent-foreground: 0 80% 58%; /* Primary red for My Forms active text/icon */
+    --sidebar-ring: 0 80% 60%; /* Red */
+
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 233 10% 13%; 
+    --foreground: 240 25% 98%; 
+
+    --muted: 233 10% 25%; 
+    --muted-foreground: 233 10% 65%; 
+
+    --popover: 233 10% 10%; 
+    --popover-foreground: 240 25% 98%;
+
+    --card: 233 10% 16%; 
+    --card-foreground: 240 25% 98%;
+
+    --border: 233 10% 30%; 
+    --input: 233 10% 30%; 
+
+    --primary: 0 75% 65%; /* Brighter Red for Dark Mode */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 80% 30%; /* Darker Red */
+    --secondary-foreground: 0 0% 98%; 
+
+    --accent: 0 80% 25%; /* Dark Pinkish */
+    --accent-foreground: 0 75% 75%; /* Lighter Red text */
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --ring: 0 75% 68%; 
+
+    /* Sidebar variables - Dark Mode */
+    --sidebar-background: 233 10% 10%; 
+    --sidebar-foreground: 240 25% 98%; 
+    --sidebar-border: 233 10% 20%; /* Darker Border */
+    --sidebar-primary: 0 75% 65%; 
+    --sidebar-primary-foreground: 0 0% 98%; 
+    --sidebar-accent: 0 80% 25%; 
+    --sidebar-accent-foreground: 0 75% 65%; 
+    --sidebar-ring: 0 75% 68%; 
+
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  /* For visually hiding elements that should be available to screen readers */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  
+  /* Custom styles for react-phone-number-input */
+  .PhoneInput {
+    @apply flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-within:outline-none focus-within:border-primary focus-within:shadow-[0_0_0_2px_hsl(var(--primary)/40)] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm;
+  }
+  
+  .PhoneInputInput {
+    @apply h-auto flex-1 border-none bg-transparent p-0 text-base text-foreground placeholder:text-muted-foreground focus:ring-0 focus-visible:ring-0 focus:outline-none md:text-sm;
+  }
+  
+  .PhoneInputCountry {
+    @apply mr-2 bg-transparent;
+  }
+
+  .PhoneInputCountrySelectArrow {
+    opacity: 0.5;
+  }
+
+  /* Custom Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted) / 0.5);
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted) / 0.7);
+  }
+  
+  /* Custom FilePond Styles */
+  .filepond--root {
+    font-family: var(--font-figtree);
+  }
+
+  .filepond--panel-root {
+    background-color: hsl(var(--input)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    border-radius: 0.375rem !important; /* md */
+  }
+
+  .filepond--drop-label {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+
+  .filepond--label-action {
+    text-decoration-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary)) !important;
+  }
+
+  .filepond--item-panel {
+    background-color: hsl(var(--muted)) !important;
+  }
+
+  /* Custom Intro.js Styles */
+  .custom-introjs-tooltip {
+    @apply bg-background border border-border text-foreground rounded-lg shadow-lg;
+  }
+
+  .dark .custom-introjs-tooltip {
+    @apply bg-popover text-popover-foreground;
+  }
+
+  .introjs-button {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-sm px-3 py-1;
+  }
+  
+  .introjs-skipbutton {
+    @apply text-muted-foreground hover:text-foreground text-xs;
+  }
+  
+  .introjs-arrow.top {
+     border-bottom-color: hsl(var(--border));
+  }
+  .dark .introjs-arrow.top {
+    border-bottom-color: hsl(var(--border));
+  }
+
+  .introjs-arrow.bottom {
+    border-top-color: hsl(var(--border));
+  }
+  .dark .introjs-arrow.bottom {
+    border-top-color: hsl(var(--border));
+  }
+  
+  .introjs-arrow.left {
+    border-right-color: hsl(var(--border));
+  }
+  .dark .introjs-arrow.left {
+    border-right-color: hsl(var(--border));
+  }
+  
+  .introjs-arrow.right {
+    border-left-color: hsl(var(--border));
+  }
+  .dark .introjs-arrow.right {
+     border-left-color: hsl(var(--border));
+  }
+
+}

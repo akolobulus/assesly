@@ -1,0 +1,13 @@
+
+# Settings to manage and configure a Firebase App Hosting backend.
+# https://firebase.google.com/docs/app-hosting/configure
+
+# A service account is required for the Firebase Admin SDK to work.
+# The "FIREBASE_SERVICE_ACCOUNT" secret is automatically created and managed
+# by App Hosting.
+requiredSecrets:
+  - secret: FIREBASE_SERVICE_ACCOUNT
+runConfig:
+  # Increase this value if you'd like to automatically spin up
+  # more instances in response to increased traffic.
+  maxInstances: 1

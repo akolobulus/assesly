@@ -1,0 +1,125 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===================================================================
+    // Helper Functions
+    // ===================================================================
+    
+    // The new Super Admin UID
+    function isSuperAdmin() {
+      return request.auth != null && request.auth.uid == "Fg6FFl1CbmW8Lv6KFvKooIxaBwx1";
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isOwnerOrCollaborator(formId) {
+      let form = get(/databases/$(database)/documents/forms/$(formId)).data;
+      return request.auth != null && (
+        request.auth.uid == form.userId ||
+        request.auth.uid in form.sharedWithUids
+      );
+    }
+
+    // ===================================================================
+    // Users Collection
+    // ===================================================================
+    match /users/{userId} {
+      allow read: if request.auth != null || isSuperAdmin();
+      allow create: if isOwner(userId) || isSuperAdmin();
+      allow update: if isOwner(userId) || isSuperAdmin();
+      allow delete: if isSuperAdmin();
+    }
+
+    // ===================================================================
+    // Forms Collection
+    // ===================================================================
+    match /forms/{formId} {
+      allow list: if (request.auth != null && (
+        (request.query.where.size() == 2 &&
+         request.query.where[0].fieldPath.string() == 'userId' && request.query.where[0].op.string() == '==' && request.query.where[0].value.string() == request.auth.uid &&
+         request.query.where[1].fieldPath.string() == 'trashedAt' && request.query.where[1].op.string() == '==' && request.query.where[1].value == null
+        ) ||
+        (request.query.where.size() == 2 &&
+         request.query.where[0].fieldPath.string() == 'sharedWithUids' && request.query.where[0].op.string() == 'array-contains' && request.query.where[0].value.string() == request.auth.uid &&
+         request.query.where[1].fieldPath.string() == 'trashedAt' && request.query.where[1].op.string() == '==' && request.query.where[1].value == null
+        )
+      )) || isSuperAdmin();
+
+      allow get: if ((resource.data.isPublished == true && resource.data.trashedAt == null) || (request.auth != null && isOwnerOrCollaborator(formId))) || isSuperAdmin();
+      
+      allow read: if (
+          (resource.data.isPublished == true && resource.data.trashedAt == null) ||
+          (request.auth != null && (isOwner(resource.data.userId) || request.auth.uid in resource.data.sharedWithUids)) ||
+          (request.auth != null && (
+            (request.query.where.size() == 2 && request.query.where[0].fieldPath.string() == 'userId' && request.query.where[0].op.string() == '==' && request.query.where[0].value.string() == request.auth.uid && request.query.where[1].fieldPath.string() == 'trashedAt' && request.query.where[1].op.string() == '==' && request.query.where[1].value == null) ||
+            (request.query.where.size() == 2 && request.query.where[0].fieldPath.string() == 'sharedWithUids' && request.query.where[0].op.string() == 'array-contains' && request.query.where[0].value.string() == request.auth.uid && request.query.where[1].fieldPath.string() == 'trashedAt' && request.query.where[1].op.string() == '==' && request.query.where[1].value == null)
+          ))
+      ) || isSuperAdmin();
+
+      allow create: if (request.auth != null && request.resource.data.userId == request.auth.uid) || isSuperAdmin();
+      allow update, delete: if isOwnerOrCollaborator(formId) || isSuperAdmin();
+
+      // Submissions Subcollection
+      match /submissions/{submissionId} {
+        allow create: if get(/databases/$(database)/documents/forms/$(formId)).data.isPublished == true;
+        allow list, read, update, delete: if isOwnerOrCollaborator(formId) || isSuperAdmin();
+      }
+
+      // Views Subcollection
+      match /views/{viewId} {
+        allow create: if true; 
+        allow read, list: if isOwner(get(/databases/$(database)/documents/forms/$(formId)).data.userId) || isSuperAdmin();
+      }
+    }
+    
+    // ===================================================================
+    // publicForms Collection
+    // ===================================================================
+    match /publicForms/{formId} {
+        allow read: if true;
+        allow write: if isOwner(get(/databases/$(database)/documents/forms/$(formId)).data.userId) || isSuperAdmin();
+    }
+
+    // ===================================================================
+    // Folders Collection
+    // ===================================================================
+    match /folders/{folderId} {
+      allow read, update, delete: if isOwner(resource.data.userId) || isSuperAdmin();
+      allow create: if isOwner(request.resource.data.userId) || isSuperAdmin();
+    }
+
+    // ===================================================================
+    // Invitations Collection
+    // ===================================================================
+    match /formInvitations/{invitationId} {
+      allow read: if request.auth != null && (isOwner(resource.data.inviterId) || request.auth.token.email == resource.data.recipientEmail) || isSuperAdmin();
+      allow create: if request.auth != null && (isOwner(get(/databases/$(database)/documents/forms/$(request.resource.data.formId)).data.userId) || isSuperAdmin());
+      allow update: if (request.auth != null && request.auth.token.email == resource.data.recipientEmail) || isSuperAdmin();
+      allow delete: if (request.auth != null && (isOwner(resource.data.inviterId) || request.auth.token.email == resource.data.recipientEmail)) || isSuperAdmin();
+    }
+
+    // ===================================================================
+    // Notifications Collection
+    // ===================================================================
+    match /users/{userId}/notifications/{notificationId} {
+       allow read, update, delete: if isOwner(userId) || isSuperAdmin();
+       allow create: if request.auth != null || isSuperAdmin();
+    }
+    
+    match /pendingNotifications/{notificationId} {
+      allow read, create: if request.auth != null || isSuperAdmin();
+    }
+
+    // ===================================================================
+    // Admins Collection (For Super Admin panel)
+    // ===================================================================
+    match /admins/{adminId} {
+        allow read, write: if isSuperAdmin();
+    }
+  }
+}
