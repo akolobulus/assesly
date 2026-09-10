@@ -11,8 +11,7 @@
 //    - Go to Firebase console > Authentication > Users.
 //    - Copy the UID for the desired user.
 // 4. Update the `userUid` and `serviceAccountPath` variables below with your values.
-// 5. Run the script from the root of your project: `node scripts/set-super-admin.mjs`
-// 6. IMPORTANT
+// 5. Run the script from the root of your project: `n
 
 import admin from 'firebase-admin';
 // The 'fs' module is used to read the service account file.
